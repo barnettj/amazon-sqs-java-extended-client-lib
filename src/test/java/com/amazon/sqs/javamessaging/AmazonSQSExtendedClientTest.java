@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
@@ -209,7 +210,7 @@ public class AmazonSQSExtendedClientTest {
     }
 
     @Test
-    public void testWhenLargeMessgaeIsSentThenAttributeWithPayloadSizeIsAdded() {
+    public void testWhenLargeMessageIsSentThenAttributeWithPayloadSizeIsAdded() {
         int messageLength = MORE_THAN_SQS_SIZE_LIMIT;
         String messageBody = generateStringWithLength(messageLength);
 
@@ -222,6 +223,24 @@ public class AmazonSQSExtendedClientTest {
         Map<String, MessageAttributeValue> attributes = sendMessageRequestCaptor.getValue().getMessageAttributes();
         Assert.assertEquals("Number", attributes.get(SQSExtendedClientConstants.RESERVED_ATTRIBUTE_NAME).getDataType());
         Assert.assertEquals(messageLength, (int)Integer.valueOf(attributes.get(SQSExtendedClientConstants.RESERVED_ATTRIBUTE_NAME).getStringValue()));
+    }
+
+    @Test
+    public void testWhenSendMessageWIthCannedAccessControlListDefined() {
+        CannedAccessControlList expected = CannedAccessControlList.BucketOwnerFullControl;
+        String messageBody = generateStringWithLength(MORE_THAN_SQS_SIZE_LIMIT);
+        ExtendedClientConfiguration extendedClientConfiguration = new ExtendedClientConfiguration()
+                .withLargePayloadSupportEnabled(mockS3, S3_BUCKET_NAME).withCannedAccessControlList(expected);
+        AmazonSQS sqsExtended = spy(new AmazonSQSExtendedClient(mockSqsBackend, extendedClientConfiguration));
+
+        SendMessageRequest messageRequest = new SendMessageRequest(SQS_QUEUE_URL, messageBody);
+        sqsExtended.sendMessage(messageRequest);
+
+        ArgumentCaptor<PutObjectRequest> captor = ArgumentCaptor.forClass(PutObjectRequest.class);
+
+        verify(mockS3).putObject(captor.capture());
+
+        Assert.assertEquals(expected, captor.getValue().getCannedAcl());
     }
 
     private String generateStringWithLength(int messageLength) {

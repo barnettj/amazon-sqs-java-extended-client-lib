@@ -16,6 +16,7 @@
 package com.amazon.sqs.javamessaging;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -116,5 +117,18 @@ public class ExtendedClientConfigurationTest {
 
     }
 
+    @Test
+    public void testCannedAccessControlList() {
+
+        ExtendedClientConfiguration extendedClientConfiguration = new ExtendedClientConfiguration();
+
+        Assert.assertFalse(extendedClientConfiguration.isCannedAccessControlListDefined());
+
+        final CannedAccessControlList accessControlList = CannedAccessControlList.BucketOwnerFullControl;
+        extendedClientConfiguration.withCannedAccessControlList(accessControlList);
+        Assert.assertTrue(extendedClientConfiguration.isCannedAccessControlListDefined());
+        Assert.assertEquals(accessControlList, extendedClientConfiguration.getCannedAccessControlList());
+
+    }
 
 }

@@ -17,6 +17,7 @@ package com.amazon.sqs.javamessaging;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.amazonaws.annotation.NotThreadSafe;
@@ -36,6 +37,7 @@ public class ExtendedClientConfiguration {
 	private boolean largePayloadSupport = false;
 	private boolean alwaysThroughS3 = false;
 	private int messageSizeThreshold = SQSExtendedClientConstants.DEFAULT_MESSAGE_SIZE_THRESHOLD;
+	private CannedAccessControlList cannedAccessControlList;
 
 	public ExtendedClientConfiguration() {
 		s3 = null;
@@ -48,6 +50,7 @@ public class ExtendedClientConfiguration {
 		this.largePayloadSupport = other.largePayloadSupport;
 		this.alwaysThroughS3 = other.alwaysThroughS3;
 		this.messageSizeThreshold = other.messageSizeThreshold;
+		this.cannedAccessControlList = other.cannedAccessControlList;
 	}
 
 	/**
@@ -213,5 +216,40 @@ public class ExtendedClientConfiguration {
 	 */
 	public boolean isAlwaysThroughS3() {
 		return alwaysThroughS3;
+	}
+
+	/**
+	 * Configures the ACL to apply to the Amazon S3 putObject request.
+	 * @param cannedAccessControlList
+	 *            The ACL to be used when storing objects in Amazon S3
+	 */
+	public void setCannedAccessControlList(CannedAccessControlList cannedAccessControlList) {
+		this.cannedAccessControlList = cannedAccessControlList;
+	}
+
+	/**
+	 * Configures the ACL to apply to the Amazon S3 putObject request.
+	 * @param cannedAccessControlList
+	 *            The ACL to be used when storing objects in Amazon S3
+	 */
+	public ExtendedClientConfiguration withCannedAccessControlList(CannedAccessControlList cannedAccessControlList) {
+		setCannedAccessControlList(cannedAccessControlList);
+		return this;
+	}
+
+	/**
+	 * Checks whether an ACL have been configured for storing objects in Amazon S3.
+	 * @return True if ACL is defined
+	 */
+	public boolean isCannedAccessControlListDefined() {
+		return null != cannedAccessControlList;
+	}
+
+	/**
+	 * Gets the AWS ACL to apply to the Amazon S3 putObject request.
+	 * @return Amazon S3 object ACL
+	 */
+	public CannedAccessControlList getCannedAccessControlList() {
+		return cannedAccessControlList;
 	}
 }
