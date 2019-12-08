@@ -32,6 +32,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.sqs.AmazonSQS;
@@ -1335,7 +1336,7 @@ public class AmazonSQSExtendedClient extends AmazonSQSExtendedClientBase impleme
 		PutObjectRequest putObjectRequest = new PutObjectRequest(clientConfiguration.getS3BucketName(), s3Key,
 				messageContentStream, messageContentStreamMetadata);
 		try {
-			clientConfiguration.getAmazonS3Client().putObject(putObjectRequest);
+			putObject(putObjectRequest);
 		} catch (AmazonServiceException e) {
 			String errorMessage = "Failed to store the message content in an S3 object. SQS message was not sent.";
 			LOG.error(errorMessage, e);
@@ -1345,6 +1346,10 @@ public class AmazonSQSExtendedClient extends AmazonSQSExtendedClientBase impleme
 			LOG.error(errorMessage, e);
 			throw new AmazonClientException(errorMessage, e);
 		}
+	}
+
+	protected PutObjectResult putObject(PutObjectRequest var1) {
+		return clientConfiguration.getAmazonS3Client().putObject(var1);
 	}
 
 	private static long getStringSizeInBytes(String str) {
